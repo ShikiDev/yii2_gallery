@@ -54,7 +54,7 @@ class ImageCollection extends \yii\db\ActiveRecord
             [['img_file'], 'image', 'extensions' => 'png, jpg'],
             [['img_file', 'email', 'describe', 'added'], 'safe'],
             [['email'], 'string', 'max' => 255],
-            [['describe'],'string','max' => 100]
+            [['describe'], 'string', 'max' => 100]
         ];
     }
 
@@ -77,6 +77,7 @@ class ImageCollection extends \yii\db\ActiveRecord
     {
         if ($this->validate()) {
             $path = Yii::getAlias('@webroot') . '/resources/images';
+            if (!is_dir($path . '/temp')) FileHelper::createDirectory($path . '/temp', 0775);
             $this->img_file->saveAs($path . '/temp/' . $this->img_file->baseName . '.' . $this->img_file->extension);
             $image = $path . '/temp/' . $this->img_file->name;
             list($old_width, $old_height) = getimagesize($image);
@@ -90,7 +91,7 @@ class ImageCollection extends \yii\db\ActiveRecord
             $img_name = md5_file($image) . '.' . $this->img_file->extension;
 
             Image::thumbnail($image, self::IMG_WIDTH, $height)->save($path . '/' . $img_name, ['quality' => 100]);
-            $this->img_file = (string)date('m_Y') . '/' .$img_name;
+            $this->img_file = (string)date('m_Y') . '/' . $img_name;
             FileHelper::unlink($image);
             return true;
         } else return false;
